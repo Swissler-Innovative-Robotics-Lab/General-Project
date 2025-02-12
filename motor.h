@@ -57,6 +57,7 @@ float pwmVal(){
 
 void setMotor(int dir, int pwmVal)
 {
+int HalfpwmVal = pwmVal/2;
   if(dir==1){
     analogWrite(MApin1,pwmVal);
     analogWrite(MApin2,0);
@@ -71,7 +72,36 @@ void setMotor(int dir, int pwmVal)
     analogWrite(MBpin2,pwmVal);
     //Serial.println("left");
   }
-  else{
+  else if(dir== -2){
+    analogWrite(MApin1,pwmVal);
+    analogWrite(MApin2,0);
+    analogWrite(MBpin1,0);
+    analogWrite(MBpin2,pwmVal);
+    //Serial.println("CW");
+  }
+  else if(dir== 2){
+    analogWrite(MApin1,0);
+    analogWrite(MApin2,pwmVal);
+    analogWrite(MBpin1,pwmVal);
+    analogWrite(MBpin2,0);
+    //Serial.println("CCW");
+  }
+   else if(dir== 3){
+    analogWrite(MApin1,pwmVal);
+    analogWrite(MApin2,0);
+    analogWrite(MBpin1,HalfpwmVal);
+    analogWrite(MBpin2,0);
+    //Serial.println("Slow right");
+  }
+   else if(dir== -3){
+    analogWrite(MApin1,0);
+    analogWrite(MApin2,pwmVal);
+    analogWrite(MBpin1,0);
+    analogWrite(MBpin2,HalfpwmVal);
+    //Serial.println("Slow left");
+  }
+
+  else {
     analogWrite(MApin1, 0);
     analogWrite(MApin2, 0);
     analogWrite(MBpin1, 0);
