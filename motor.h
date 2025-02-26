@@ -37,7 +37,7 @@ void readEncoder(){
   }
 }
 
-void motorSetup() {
+void MotorSetup() {
   // put your setup code here, to run once:
   Serial.begin(baudrate);
   pinMode(MAEN1,INPUT);
@@ -101,7 +101,7 @@ int HalfpwmVal = pwmVal/2;
     //Serial.println("Slow left");
   }
 
-  else {
+  else if(dir== 0){
     analogWrite(MApin1, 0);
     analogWrite(MApin2, 0);
     analogWrite(MBpin1, 0);
