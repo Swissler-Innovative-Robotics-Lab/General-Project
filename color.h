@@ -1,27 +1,28 @@
-#include <Wire.h>
-#include <math.h>
+#pragma once
+
+#include <Arduino.h>
 #include "Adafruit_TCS34725.h"
 
-// Define Pins
+// ==== PIN DEFINITIONS ====
 #define PIN_BUTTON  5
 #define PIN_LED     13
 
-// White and Black Thresholds
-#define THRESHOLD_WHITE 3700
-#define THRESHOLD_BLACK 800
+// ==== THRESHOLDS ====
+#define THRESHOLD_WHITE     3700
+#define THRESHOLD_BLACK     800
 #define THRESH_WHITE_OFFSET 500
 #define THRESH_BLACK_OFFSET 200
 
-// Hue Thresholds
-#define RED_MIN_0   0
-#define YELLOW_MIN  0.125
-#define GREEN_MIN   0.25
-#define CYAN_MIN    0.35
-#define BLUE_MIN    0.53
-#define MAGENTA_MIN 0.7
-#define RED_MIN_1   0.85
+// ==== HUE RANGES ====
+#define RED_MIN_0     0
+#define YELLOW_MIN    0.125
+#define GREEN_MIN     0.25
+#define CYAN_MIN      0.35
+#define BLUE_MIN      0.53
+#define MAGENTA_MIN   0.7
+#define RED_MIN_1     0.85
 
-// Color Labels
+// ==== COLOR LABELS ====
 #define COLOR_WHITE     0
 #define COLOR_BLACK     1
 #define COLOR_RED       2
@@ -31,144 +32,14 @@
 #define COLOR_BLUE      6
 #define COLOR_MAGENTA   7
 
-// Global Variables
-Adafruit_TCS34725 color_sensor = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X);
-uint16_t max_brightness = 0;
-uint16_t min_brightness = 65000;
+// ==== Global Objects ====
+extern Adafruit_TCS34725 color_sensor;
+extern uint16_t max_brightness;
+extern uint16_t min_brightness;
 
-// Calc Hues
-//float   calcHue(float, float, float);
-//uint8_t determineColor(float, uint16_t, uint16_t, uint16_t);
-
-// Setup function. Nothing Interesting Here
-void Sensorsetup() {
-  Serial.begin(9600);
-
-  pinMode(PIN_LED, OUTPUT);
-  digitalWrite(PIN_LED, LOW);
-
-  pinMode(PIN_BUTTON, INPUT_PULLUP);
-  delay(3000);
-  Serial.println("Press Button");
-}
-
-float calcHue(float red, float green, float blue)
-{
-  float hue;
-  // Intemediate Values
-  float c_max = max(max(red, green), blue);
-  float c_min = min(min(red, green), blue);
-  float delta = c_max - c_min;
-
-  // Calculate things
-  if(delta != 0)
-  {
-    if(red == c_max)
-    {
-      hue = (green - blue) / delta;
-    }
-    if(green == c_max)
-    {
-      hue = 2.0 + (blue - red) / delta;
-    }
-    if(blue == c_max)
-    {
-      hue = 4.0 + (red - green) / delta;
-    }
-
-    hue = hue / 6.0;
-    hue = fmodf(hue, 1.0);
-  }
-  else
-  {
-    hue = 0.0;
-  }
-
-  return hue;
-}
-
-uint8_t determineColor(float hue, uint16_t brightness, uint16_t thresh_white, uint16_t thresh_black)
-{
-  uint8_t color;
-
-  // This function is just annoying...
-  if(brightness > thresh_white)
-  {
-    color = COLOR_WHITE;
-  }
-  else
-  {
-    if(brightness < thresh_black)
-    {
-      color = COLOR_BLACK;
-    }
-    else
-    {
-      if(hue > RED_MIN_1)
-      {
-        color = COLOR_RED;
-      }
-      else
-      {
-        if(hue > MAGENTA_MIN)
-        {
-          color = COLOR_MAGENTA;
-        }
-        else
-        {
-          if(hue > BLUE_MIN)
-          {
-            color = COLOR_BLUE;
-          }
-          else
-          {
-            if(hue > CYAN_MIN)
-            {
-              color = COLOR_CYAN;
-            }
-            else
-            {
-              if(hue > GREEN_MIN)
-              {
-                color = COLOR_GREEN;
-              }
-              else
-              {
-                if(hue > YELLOW_MIN)
-                {
-                  color = COLOR_YELLOW;
-                }
-                else
-                {
-                  //if(hue > RED_MIN_0)
-                  //{
-                    color = COLOR_RED;
-                  //}
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  return color;
-}
-
-uint8_t color(){
-  uint8_t color_index;
-  uint16_t r;
-  uint16_t g;
-  uint16_t b;
-  uint16_t c;
-  color_sensor.getRawData(&r, &g, &b, &c);
-  // Automatic calibration
-  min_brightness = min(min_brightness, c);
-  max_brightness = max(max_brightness, c);
-  // Calculate the hue
-  float hue = calcHue((float)r, (float)g, (float)b);
-  // Turn it into discrete colors
-  color_index = determineColor(hue, c, max_brightness - THRESH_WHITE_OFFSET, min_brightness + THRESH_BLACK_OFFSET);
-  return color_index;
-}
+// ==== Function Prototypes ====
+void SensorSetup();
+float calcHue(float red, float green, float blue);
+uint8_t determineColor(float hue, uint16_t brightness, uint16_t thresh_white, uint16_t thresh_black);
+uint8_t color();
+void calcHSL();
